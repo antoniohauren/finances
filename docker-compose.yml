@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: finances_db
+    restart: always
+    environment:
+      POSTGRES_USER: finances_db
+      POSTGRES_PASSWORD: finances_db
+      POSTGRES_DB: finances_db
+    ports:
+      - "5432:5432"
