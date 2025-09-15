@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"encoding/json"
@@ -8,27 +8,27 @@ import (
 	"github.com/antoniohauren/finances/internal/services"
 )
 
-type Controller struct {
+type Handlers struct {
 	services *services.Services
 }
 
-func New(services *services.Services) *Controller {
-	return &Controller{
+func New(services *services.Services) *Handlers {
+	return &Handlers{
 		services: services,
 	}
 }
 
-func (c Controller) registerRoot() {
+func (h Handlers) registerRoot() {
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode("Hello world")
 	})
 }
 
-func (c Controller) Listen(port int) error {
-	c.registerRoot()
+func (h Handlers) Listen(port int) error {
+	h.registerRoot()
 
-	c.registerUsersEndpoints()
+	h.registerUsersEndpoints()
 
 	return http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 }

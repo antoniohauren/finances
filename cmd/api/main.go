@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/antoniohauren/finances/database"
-	"github.com/antoniohauren/finances/internal/controllers"
+	"github.com/antoniohauren/finances/internal/handlers"
 	"github.com/antoniohauren/finances/internal/repositories"
 	"github.com/antoniohauren/finances/internal/services"
 	"github.com/joho/godotenv"
@@ -31,7 +31,7 @@ func main() {
 
 	repos := repositories.New(db)
 	services := services.New(repos)
-	app := controllers.New(services)
+	app := handlers.New(services)
 
 	appPort := os.Getenv("APP_PORT")
 	port, err := strconv.Atoi(appPort)

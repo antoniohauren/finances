@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"encoding/json"
@@ -8,11 +8,11 @@ import (
 	"github.com/antoniohauren/finances/utils"
 )
 
-func (c Controller) registerUsersEndpoints() {
-	http.HandleFunc("POST /user", c.createUserEndpoint)
+func (h Handlers) registerUsersEndpoints() {
+	http.HandleFunc("POST /user", h.createUserEndpoint)
 }
 
-func (c Controller) createUserEndpoint(w http.ResponseWriter, r *http.Request) {
+func (h Handlers) createUserEndpoint(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -21,7 +21,7 @@ func (c Controller) createUserEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := c.services.CreateUser(req)
+	id, err := h.services.CreateUser(req)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
