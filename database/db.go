@@ -11,8 +11,6 @@ import (
 )
 
 func ConnectDB() *sql.DB {
-	slog.Info("connecting to database...")
-
 	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASSWORD")

@@ -9,6 +9,8 @@ import (
 
 	"github.com/antoniohauren/finances/database"
 	"github.com/antoniohauren/finances/internal/controllers"
+	"github.com/antoniohauren/finances/internal/repositories"
+	"github.com/antoniohauren/finances/internal/services"
 	"github.com/joho/godotenv"
 )
 
@@ -20,12 +22,16 @@ func init() {
 	}
 
 	db = database.ConnectDB()
+
+	database.MigrateAll(db)
 }
 
 func main() {
 	defer db.Close()
 
-	app := controllers.New()
+	repos := repositories.New(db)
+	services := services.New(repos)
+	app := controllers.New(services)
 
 	appPort := os.Getenv("APP_PORT")
 	port, err := strconv.Atoi(appPort)
