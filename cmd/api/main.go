@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/antoniohauren/finances/database"
 	"github.com/antoniohauren/finances/internal/controllers"
-	"github.com/antoniohauren/finances/internal/database"
 	"github.com/joho/godotenv"
 )
 
