@@ -9,6 +9,7 @@ import (
 type Repositories struct {
 	User interface {
 		CreateUser(newUser models.User) (string, error)
+		GetUserByEmail(email string) (*models.User, error)
 	}
 }
 

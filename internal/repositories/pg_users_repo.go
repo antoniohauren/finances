@@ -39,3 +39,27 @@ func (r *PgUsersRepo) CreateUser(newUser models.User) (string, error) {
 
 	return id, nil
 }
+
+func (r *PgUsersRepo) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+
+	query := `
+		SELECT id, name, email, password_hash
+		FROM users
+		WHERE email = $1
+	`
+
+	err := r.db.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+	)
+
+	if err != nil {
+		slog.Error("get by email", "error", err.Error())
+		return nil, err
+	}
+
+	return &user, nil
+}
