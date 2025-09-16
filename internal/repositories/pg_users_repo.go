@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 
 	"github.com/antoniohauren/finances/internal/models"
@@ -21,14 +22,15 @@ func (r *PgUsersRepo) CreateUser(newUser models.User) (string, error) {
 	var id string
 
 	query := `
-		INSERT INTO users (name, email, password_hash)
-		VALUES ($1, $2, $3)
+		INSERT INTO users (name, email, code, password_hash)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`
 
 	err := r.db.QueryRow(query,
 		newUser.Name,
 		newUser.Email,
+		newUser.Code,
 		newUser.Password,
 	).Scan(&id)
 
@@ -44,7 +46,7 @@ func (r *PgUsersRepo) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	query := `
-		SELECT id, name, email, password_hash
+		SELECT id, name, email, code, password_hash
 		FROM users
 		WHERE email = $1
 	`
@@ -53,6 +55,7 @@ func (r *PgUsersRepo) GetUserByEmail(email string) (*models.User, error) {
 		&user.ID,
 		&user.Name,
 		&user.Email,
+		&user.Code,
 		&user.Password,
 	)
 
@@ -62,4 +65,21 @@ func (r *PgUsersRepo) GetUserByEmail(email string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *PgUsersRepo) ConfirmUser(email string) error {
+	query := `
+		UPDATE users
+		SET code = NULL, updated_at = NOW()
+		WHERE email = $1
+	`
+
+	_, err := r.db.Exec(query, email)
+
+	if err != nil {
+		slog.Error("repo - confirm user", "error", err)
+		return fmt.Errorf("someting went wrong")
+	}
+
+	return nil
 }

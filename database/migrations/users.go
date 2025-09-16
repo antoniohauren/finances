@@ -12,6 +12,7 @@ func MigrateUser(db *sql.DB) error {
 			name VARCHAR(100) NOT NULL,
 			email VARCHAR(100) NOT NULL UNIQUE,
 			password_hash VARCHAR(100) NOT NULL,
+			code VARCHAR(10),
 			created_at TIMESTAMP DEFAULT (now()),
 			updated_at TIMESTAMP
 		)

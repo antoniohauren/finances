@@ -24,6 +24,45 @@ func (s *Services) VerifyUser(token string) (bool, error) {
 	return true, nil
 }
 
+func (s *Services) ConfirmUser(token string, code string) error {
+	claims, err := s.jwtToken.VerifyToken(token)
+
+	if err != nil {
+		return err
+	}
+
+	email := claims.Email
+
+	if email == "" {
+		return fmt.Errorf("email not found in token")
+	}
+
+	// get email and check if already done
+
+	user, err := s.repos.User.GetUserByEmail(email)
+
+	if err != nil {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	if !user.Code.Valid || user.Code.String == "" {
+		return fmt.Errorf("code already used")
+	}
+
+	if user.Code.String != code {
+		slog.Error("Invalid confirmation code")
+		return fmt.Errorf("Unauthorized")
+	}
+
+	err = s.repos.User.ConfirmUser(user.Email)
+
+	if err != nil {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	return nil
+}
+
 func (s *Services) SignIn(dto models.AuthSignInRequest) (uuid.UUID, string, error) {
 	user, err := s.repos.User.GetUserByEmail(dto.Email)
 
@@ -42,7 +81,7 @@ func (s *Services) SignIn(dto models.AuthSignInRequest) (uuid.UUID, string, erro
 		return uuid.Nil, "", err
 	}
 
-	accessToken, _, err := s.jwtToken.CreateToken(uid, user.Email, 15*time.Minute)
+	accessToken, _, err := s.jwtToken.CreateToken(uid, user.Email, time.Hour)
 
 	if err != nil {
 		return uuid.Nil, "", err

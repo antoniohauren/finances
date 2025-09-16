@@ -1,12 +1,17 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"database/sql"
+
+	"github.com/google/uuid"
+)
 
 type User struct {
 	ID       uuid.UUID
 	Name     string
 	Email    string
 	Password string
+	Code     sql.NullString
 }
 
 type CreateUserRequest struct {
