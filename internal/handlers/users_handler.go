@@ -21,7 +21,7 @@ func (h Handlers) createUserEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.services.CreateUser(req)
+	id, jwtToken, err := h.services.CreateUser(req)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -29,6 +29,15 @@ func (h Handlers) createUserEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if jwtToken == "" {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "something went wrong"})
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(models.CreateUserResponse{UserID: id})
+	json.NewEncoder(w).Encode(models.CreateUserResponse{
+		UserID:      id,
+		AccessToken: jwtToken,
+	})
 }

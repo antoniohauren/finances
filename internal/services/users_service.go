@@ -1,16 +1,18 @@
 package services
 
 import (
+	"time"
+
 	"github.com/antoniohauren/finances/internal/models"
 	"github.com/antoniohauren/finances/utils"
 	"github.com/google/uuid"
 )
 
-func (s *Services) CreateUser(newUser models.CreateUserRequest) (uuid.UUID, error) {
+func (s *Services) CreateUser(newUser models.CreateUserRequest) (uuid.UUID, string, error) {
 	hashedPassword, err := utils.HashPassword(newUser.Password)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
 	dto := models.User{
@@ -22,14 +24,20 @@ func (s *Services) CreateUser(newUser models.CreateUserRequest) (uuid.UUID, erro
 	id, err := s.repos.User.CreateUser(dto)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
-	return uid, nil
+	accessToken, _, err := s.jwtToken.CreateToken(uid, newUser.Email, 15*time.Minute)
+
+	if err != nil {
+		return uuid.Nil, "", err
+	}
+
+	return uid, accessToken, nil
 }

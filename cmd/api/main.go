@@ -29,8 +29,10 @@ func init() {
 func main() {
 	defer db.Close()
 
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+
 	repos := repositories.New(db)
-	services := services.New(repos)
+	services := services.New(repos, secretKey)
 	app := handlers.New(services)
 
 	appPort := os.Getenv("APP_PORT")
