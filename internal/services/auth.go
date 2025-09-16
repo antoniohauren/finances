@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/antoniohauren/finances/internal/auth"
 	"github.com/antoniohauren/finances/internal/models"
-	"github.com/antoniohauren/finances/utils"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,7 @@ func (s *Services) SignIn(dto models.AuthSignInRequest) (uuid.UUID, string, erro
 		return uuid.Nil, "", err
 	}
 
-	if err := utils.CheckPassword(dto.Password, user.Password); err != nil {
+	if err := auth.CheckPassword(dto.Password, user.Password); err != nil {
 		return uuid.Nil, "", err
 	}
 

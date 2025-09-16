@@ -3,13 +3,13 @@ package services
 import (
 	"time"
 
+	"github.com/antoniohauren/finances/internal/auth"
 	"github.com/antoniohauren/finances/internal/models"
-	"github.com/antoniohauren/finances/utils"
 	"github.com/google/uuid"
 )
 
 func (s *Services) CreateUser(newUser models.CreateUserRequest) (uuid.UUID, string, error) {
-	hashedPassword, err := utils.HashPassword(newUser.Password)
+	hashedPassword, err := auth.HashPassword(newUser.Password)
 
 	if err != nil {
 		return uuid.Nil, "", err

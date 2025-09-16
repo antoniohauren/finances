@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/antoniohauren/finances/internal/models"
-	"github.com/antoniohauren/finances/utils"
 )
 
 func (h Handlers) registerUsersEndpoints() {
@@ -19,7 +18,7 @@ func (h Handlers) createAuthSignUpEndpoint(w http.ResponseWriter, r *http.Reques
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "Bad Request"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "Bad Request"})
 		return
 	}
 
@@ -27,13 +26,13 @@ func (h Handlers) createAuthSignUpEndpoint(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: err.Error()})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: err.Error()})
 		return
 	}
 
 	if jwtToken == "" {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "something went wrong"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "something went wrong"})
 		return
 	}
 
@@ -49,7 +48,7 @@ func (h Handlers) createAuthSigninEndpoint(w http.ResponseWriter, r *http.Reques
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "Bad Request"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "Bad Request"})
 		return
 	}
 
@@ -57,13 +56,13 @@ func (h Handlers) createAuthSigninEndpoint(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "Unauthorized"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "Unauthorized"})
 		return
 	}
 
 	if jwtToken == "" {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "something went wrong"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "something went wrong"})
 		return
 	}
 
@@ -83,7 +82,7 @@ func (h Handlers) createVerifyEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(utils.ErrorResponse{Reason: "Bad Request"})
+		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "Bad Request"})
 		return
 	}
 
