@@ -76,3 +76,18 @@ type CreateBillRequest struct {
 type CreateBillResponse struct {
 	BillID uuid.UUID `json:"bill_id"`
 }
+
+type BillItemResponse struct {
+	ID            uuid.UUID         `json:"bill_id"`
+	Name          string            `json:"name"`
+	DueDate       time.Time         `json:"due_date"`
+	Type          BillType          `json:"type"`
+	Category      BillCategory      `json:"category"`
+	Frequency     BillFrequency     `json:"frequency"`
+	PaymentMethod BillPaymentMethod `json:"payment_method"`
+	UserID        uuid.UUID         `json:"user_id"`
+}
+
+type GetAllBillsResponse struct {
+	Items []BillItemResponse `json:"items"`
+}

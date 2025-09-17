@@ -10,6 +10,7 @@ import (
 
 func (h Handlers) registerBillsEndpoints() {
 	http.HandleFunc("POST /bills", h.createBillEndpoint)
+	http.HandleFunc("GET /bills", h.getAllBillsEndpoint)
 }
 
 func (h Handlers) createBillEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -34,12 +35,28 @@ func (h Handlers) createBillEndpoint(w http.ResponseWriter, r *http.Request) {
 	id, err := h.services.CreateBill(req)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "something went wrong"})
+		slog.Error("create-bill", "error", err.Error())
+		respondJSONError(w, http.StatusInternalServerError, "something went wrong")
+		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(models.CreateBillResponse{
+	respondJSON(w, http.StatusCreated, models.CreateBillResponse{
 		BillID: id,
+	})
+}
+
+func (h Handlers) getAllBillsEndpoint(w http.ResponseWriter, r *http.Request) {
+	user, err := h.ExtractUserFromToken(w, r)
+
+	if err != nil {
+		slog.Error("extract-user", "error", err.Error())
+		respondJSONError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	items := h.services.GetAllBills(user.ID)
+
+	respondJSON(w, http.StatusOK, models.GetAllBillsResponse{
+		Items: items,
 	})
 }

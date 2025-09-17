@@ -30,3 +30,28 @@ func (s *Services) CreateBill(newBill models.CreateBillRequest) (uuid.UUID, erro
 
 	return uid, nil
 }
+
+func (s *Services) GetAllBills(userID uuid.UUID) []models.BillItemResponse {
+	bills, err := s.repos.Bill.GetAllBills(userID)
+
+	if err != nil {
+		return nil
+	}
+
+	items := make([]models.BillItemResponse, len(bills))
+
+	for i, b := range bills {
+		items[i] = models.BillItemResponse{
+			ID:            b.ID,
+			Name:          b.Name,
+			DueDate:       b.DueDate,
+			Type:          b.Type,
+			Category:      b.Category,
+			Frequency:     b.Frequency,
+			PaymentMethod: b.PaymentMethod,
+			UserID:        b.UserID,
+		}
+	}
+
+	return items
+}
