@@ -40,6 +40,7 @@ func (h Handlers) ExtractUserFromToken(w http.ResponseWriter, r *http.Request) (
 	token := parts[1]
 
 	user, err := h.services.GetUserFromToken(token)
+
 	if err != nil {
 		return nil, err
 	}

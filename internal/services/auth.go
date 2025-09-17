@@ -31,6 +31,9 @@ func (s *Services) GetUserFromToken(token string) (*models.UserClaims, error) {
 		return nil, err
 	}
 
+	// TODO: not sure if this is ok to do, maybe refresh the token when confirm email instead
+	claims.IsVerified = s.repos.User.IsUserVerified(claims.ID)
+
 	return claims, err
 }
 

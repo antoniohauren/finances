@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/antoniohauren/finances/internal/models"
+	"github.com/google/uuid"
 )
 
 type PgUsersRepo struct {
@@ -82,4 +83,23 @@ func (r *PgUsersRepo) ConfirmUser(email string) error {
 	}
 
 	return nil
+}
+
+func (r *PgUsersRepo) IsUserVerified(id uuid.UUID) bool {
+	var code sql.NullString
+
+	query := `
+		SELECT code
+		FROM users
+		WHERE id = $1;
+	`
+
+	err := r.db.QueryRow(query, id).Scan(&code)
+
+	if err != nil {
+		slog.Error("is-user-verified", "error", err.Error())
+		return false
+	}
+
+	return !code.Valid || code.String == ""
 }

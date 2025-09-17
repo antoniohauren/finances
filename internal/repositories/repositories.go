@@ -11,6 +11,7 @@ type Repositories struct {
 	User interface {
 		CreateUser(newUser models.User) (string, error)
 		GetUserByEmail(email string) (*models.User, error)
+		IsUserVerified(id uuid.UUID) bool
 		ConfirmUser(email string) error
 	}
 	Bill interface {

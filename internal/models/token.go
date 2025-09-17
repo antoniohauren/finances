@@ -9,8 +9,9 @@ import (
 )
 
 type UserClaims struct {
-	ID    uuid.UUID `json:"id"`
-	Email string    `json:"email"`
+	ID         uuid.UUID `json:"id"`
+	Email      string    `json:"email"`
+	IsVerified bool      `json:"is_verified"`
 	jwt.RegisteredClaims
 }
 

@@ -32,6 +32,11 @@ func (h Handlers) createBillEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !user.IsVerified {
+		respondJSONError(w, http.StatusUnauthorized, "please confirm your email")
+		return
+	}
+
 	req.UserID = user.ID
 
 	id, err := h.services.CreateBill(req)
@@ -56,6 +61,11 @@ func (h Handlers) getAllBillsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !user.IsVerified {
+		respondJSONError(w, http.StatusUnauthorized, "please confirm your email")
+		return
+	}
+
 	items := h.services.GetAllBills(user.ID)
 
 	respondJSON(w, http.StatusOK, models.GetAllBillsResponse{
@@ -69,6 +79,11 @@ func (h Handlers) getBillByIdEndpoint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error("extract-user", "error", err.Error())
 		respondJSONError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	if !user.IsVerified {
+		respondJSONError(w, http.StatusUnauthorized, "please confirm your email")
 		return
 	}
 
