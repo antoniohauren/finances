@@ -45,8 +45,35 @@ func (r *PgBillRepo) CreateBill(newBill models.Bill) (string, error) {
 	return id, nil
 }
 
-func (r *PgBillRepo) GetBillById(id uuid.UUID) (*models.Bill, error) {
-	return nil, nil
+func (r *PgBillRepo) GetBillByID(id uuid.UUID) (*models.Bill, error) {
+	query := `
+		SELECT id, name, due_date, type, category, frequency, payment_method, user_id
+		FROM bills
+		WHERE id = $1
+	`
+
+	var bill models.Bill
+
+	err := r.db.QueryRow(query, id).Scan(
+		&bill.ID,
+		&bill.Name,
+		&bill.DueDate,
+		&bill.Type,
+		&bill.Category,
+		&bill.Frequency,
+		&bill.PaymentMethod,
+		&bill.UserID,
+	)
+
+	if err != nil {
+		if err != sql.ErrNoRows {
+			slog.Error("get-bill-by-id", "error", err.Error())
+		}
+
+		return nil, err
+	}
+
+	return &bill, nil
 }
 
 func (r *PgBillRepo) GetAllBills(userID uuid.UUID) ([]models.Bill, error) {

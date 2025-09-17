@@ -91,3 +91,5 @@ type BillItemResponse struct {
 type GetAllBillsResponse struct {
 	Items []BillItemResponse `json:"items"`
 }
+
+type GetBillByIDResponse BillItemResponse

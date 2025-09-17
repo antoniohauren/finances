@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/antoniohauren/finances/internal/models"
 	"github.com/google/uuid"
 )
@@ -54,4 +56,29 @@ func (s *Services) GetAllBills(userID uuid.UUID) []models.BillItemResponse {
 	}
 
 	return items
+}
+
+func (s *Services) GetBillByID(userID uuid.UUID, id uuid.UUID) (*models.GetBillByIDResponse, error) {
+	bill, err := s.repos.Bill.GetBillByID(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if bill.UserID != userID {
+		return nil, fmt.Errorf("can't access this bill")
+	}
+
+	res := models.GetBillByIDResponse{
+		ID:            bill.ID,
+		Name:          bill.Name,
+		DueDate:       bill.DueDate,
+		Type:          bill.Type,
+		Category:      bill.Category,
+		Frequency:     bill.Frequency,
+		PaymentMethod: bill.PaymentMethod,
+		UserID:        bill.UserID,
+	}
+
+	return &res, nil
 }
