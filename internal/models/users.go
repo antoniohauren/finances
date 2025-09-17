@@ -26,3 +26,7 @@ type CreateUserResponse struct {
 	AccessToken  string    `json:"access_token"`
 	RefreshToken string    `json:"refresh_token"`
 }
+
+type VerifyUserResponse struct {
+	IsValid bool `json:"is_valid"`
+}

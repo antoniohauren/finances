@@ -16,7 +16,7 @@ type Repositories struct {
 	Bill interface {
 		CreateBill(newBill models.Bill) (string, error)
 		GetBillById(id uuid.UUID) (*models.Bill, error)
-		GetAllBills() []models.Bill
+		GetAllBills(userId uuid.UUID) ([]models.Bill, error)
 	}
 }
 

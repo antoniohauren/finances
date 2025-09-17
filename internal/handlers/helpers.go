@@ -10,11 +10,11 @@ import (
 	"github.com/antoniohauren/finances/internal/models"
 )
 
-// func respondJSON(w http.ResponseWriter, status int, message any) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(status)
-// 	json.NewEncoder(w).Encode(message)
-// }
+func respondJSON(w http.ResponseWriter, status int, message any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(message)
+}
 
 func respondJSONError(w http.ResponseWriter, status int, reason string) {
 	w.Header().Set("Content-Type", "application/json")

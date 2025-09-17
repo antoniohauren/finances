@@ -49,6 +49,45 @@ func (r *PgBillRepo) GetBillById(id uuid.UUID) (*models.Bill, error) {
 	return nil, nil
 }
 
-func (r *PgBillRepo) GetAllBills() []models.Bill {
-	return nil
+func (r *PgBillRepo) GetAllBills(userID uuid.UUID) ([]models.Bill, error) {
+	query := `
+		SELECT id, name, due_date, type, category, frequency, payment_method
+		FROM bills
+		WHERE user_id = $1
+		ORDER BY due_date ASC;
+	`
+
+	rows, err := r.db.Query(query, userID)
+
+	if err != nil {
+		slog.Error("get all bills", "error", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var bills []models.Bill
+
+	for rows.Next() {
+		var b models.Bill
+
+		err := rows.Scan(
+			&b.ID,
+			&b.Name,
+			&b.DueDate,
+			&b.Type,
+			&b.Category,
+			&b.Frequency,
+			&b.PaymentMethod,
+		)
+
+		if err != nil {
+			slog.Error("scan bill", "error", err.Error())
+			return nil, err
+		}
+
+		b.UserID = userID
+		bills = append(bills, b)
+	}
+
+	return bills, nil
 }
