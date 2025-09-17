@@ -7,11 +7,12 @@ import (
 )
 
 type User struct {
-	ID       uuid.UUID
+	BaseEntity
 	Name     string
 	Email    string
 	Password string
 	Code     sql.NullString
+	Bills    []Bill
 }
 
 type CreateUserRequest struct {

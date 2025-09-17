@@ -77,8 +77,8 @@ func (h Handlers) createAuthSigninEndpoint(w http.ResponseWriter, r *http.Reques
 }
 
 func (h Handlers) createConfirmUserEndpoint(w http.ResponseWriter, r *http.Request) {
-
 	authHeader := r.Header.Get("Authorization")
+
 	if authHeader == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(models.ErrorResponse{Reason: "missing Authorization header"})

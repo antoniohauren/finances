@@ -24,6 +24,16 @@ func (s *Services) VerifyUser(token string) (bool, error) {
 	return true, nil
 }
 
+func (s *Services) GetUserFromToken(token string) (*models.UserClaims, error) {
+	claims, err := s.jwtToken.VerifyToken(token)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, err
+}
+
 func (s *Services) ConfirmUser(token string, code string) error {
 	claims, err := s.jwtToken.VerifyToken(token)
 
