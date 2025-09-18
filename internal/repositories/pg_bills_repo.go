@@ -90,6 +90,7 @@ func (r *PgBillRepo) GetAllBills(userID uuid.UUID) ([]models.Bill, error) {
 		slog.Error("get all bills", "error", err.Error())
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var bills []models.Bill

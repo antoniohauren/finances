@@ -19,11 +19,18 @@ type Repositories struct {
 		GetBillByID(id uuid.UUID) (*models.Bill, error)
 		GetAllBills(userId uuid.UUID) ([]models.Bill, error)
 	}
+	Payment interface {
+		CreatePayment(newPayment models.Payment) (string, error)
+		GetPaymentByID(id uuid.UUID) (*models.Payment, error)
+		GetAllPayments(userId uuid.UUID) ([]models.Payment, error)
+		GetAllPaymentsByBill(userId uuid.UUID, billID uuid.UUID) ([]models.Payment, error)
+	}
 }
 
 func New(db *sql.DB) *Repositories {
 	return &Repositories{
-		User: NewPgUsersRepo(db),
-		Bill: NewPgBillRepo(db),
+		User:    NewPgUsersRepo(db),
+		Bill:    NewPgBillRepo(db),
+		Payment: NewPaymentRepo(db),
 	}
 }

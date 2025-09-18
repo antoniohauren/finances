@@ -30,6 +30,7 @@ func (h Handlers) Listen(port int) error {
 
 	h.registerUsersEndpoints()
 	h.registerBillsEndpoints()
+	h.registerPaymentsEndpoints()
 
 	return http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 }
