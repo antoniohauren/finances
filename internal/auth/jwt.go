@@ -19,8 +19,8 @@ func NewJwt(secretKey string) *Jwt {
 	}
 }
 
-func (j *Jwt) CreateToken(id uuid.UUID, email string, duration time.Duration) (string, *models.UserClaims, error) {
-	claims, err := models.NewUserClaims(id, email, duration)
+func (j *Jwt) CreateToken(id uuid.UUID, email string, isVerified bool, duration time.Duration) (string, *models.UserClaims, error) {
+	claims, err := models.NewUserClaims(id, email, isVerified, duration)
 
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create claims %w", err)

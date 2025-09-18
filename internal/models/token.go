@@ -15,7 +15,7 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserClaims(id uuid.UUID, email string, duration time.Duration) (*UserClaims, error) {
+func NewUserClaims(id uuid.UUID, email string, isVerified bool, duration time.Duration) (*UserClaims, error) {
 	tokenId, err := uuid.NewRandom()
 
 	if err != nil {
@@ -23,8 +23,9 @@ func NewUserClaims(id uuid.UUID, email string, duration time.Duration) (*UserCla
 	}
 
 	return &UserClaims{
-		ID:    id,
-		Email: email,
+		ID:         id,
+		Email:      email,
+		IsVerified: isVerified,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        tokenId.String(),
 			Subject:   email,

@@ -30,3 +30,7 @@ type CreateUserResponse struct {
 type VerifyUserResponse struct {
 	IsValid bool `json:"is_valid"`
 }
+
+type ConfirmUserResponse struct {
+	Token string `json:"token"`
+}

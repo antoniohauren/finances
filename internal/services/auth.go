@@ -31,49 +31,55 @@ func (s *Services) GetUserFromToken(token string) (*models.UserClaims, error) {
 		return nil, err
 	}
 
-	// TODO: not sure if this is ok to do, maybe refresh the token when confirm email instead
-	claims.IsVerified = s.repos.User.IsUserVerified(claims.ID)
+	if !claims.IsVerified {
+		claims.IsVerified = s.repos.User.IsUserVerified(claims.ID)
+	}
 
 	return claims, err
 }
 
-func (s *Services) ConfirmUser(token string, code string) error {
+func (s *Services) ConfirmUser(token string, code string) (string, error) {
 	claims, err := s.jwtToken.VerifyToken(token)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	email := claims.Email
 
 	if email == "" {
-		return fmt.Errorf("email not found in token")
+		return "", fmt.Errorf("email not found in token")
 	}
-
-	// get email and check if already done
 
 	user, err := s.repos.User.GetUserByEmail(email)
 
 	if err != nil {
-		return fmt.Errorf("Unauthorized")
+		return "", fmt.Errorf("Unauthorized")
 	}
 
 	if !user.Code.Valid || user.Code.String == "" {
-		return fmt.Errorf("code already used")
+		return "", fmt.Errorf("code already used")
 	}
 
 	if user.Code.String != code {
 		slog.Error("Invalid confirmation code")
-		return fmt.Errorf("Unauthorized")
+		return "", fmt.Errorf("Unauthorized")
 	}
 
 	err = s.repos.User.ConfirmUser(user.Email)
 
 	if err != nil {
-		return fmt.Errorf("Unauthorized")
+		return "", fmt.Errorf("Unauthorized")
 	}
 
-	return nil
+	isVerified := true
+	accessToken, _, err := s.jwtToken.CreateToken(user.ID, user.Email, isVerified, time.Hour)
+
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
 }
 
 func (s *Services) SignIn(dto models.AuthSignInRequest) (uuid.UUID, string, error) {
@@ -94,7 +100,9 @@ func (s *Services) SignIn(dto models.AuthSignInRequest) (uuid.UUID, string, erro
 		return uuid.Nil, "", err
 	}
 
-	accessToken, _, err := s.jwtToken.CreateToken(uid, user.Email, time.Hour)
+	isVerified := user.Code.String == ""
+
+	accessToken, _, err := s.jwtToken.CreateToken(uid, user.Email, isVerified, time.Hour)
 
 	if err != nil {
 		return uuid.Nil, "", err

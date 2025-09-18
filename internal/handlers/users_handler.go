@@ -86,7 +86,7 @@ func (h Handlers) createConfirmUserEndpoint(w http.ResponseWriter, r *http.Reque
 	token := parts[1]
 
 	code := r.PathValue("code")
-	err := h.services.ConfirmUser(token, code)
+	newToken, err := h.services.ConfirmUser(token, code)
 
 	if err != nil {
 		slog.Error("confirm-user", "error", err.Error())
@@ -94,7 +94,9 @@ func (h Handlers) createConfirmUserEndpoint(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	respondJSON(w, http.StatusOK, models.SuccessResponse{Message: "User confirmed Successfully"})
+	respondJSON(w, http.StatusOK, models.ConfirmUserResponse{
+		Token: newToken,
+	})
 }
 
 func (h Handlers) createVerifyEndpoint(w http.ResponseWriter, r *http.Request) {

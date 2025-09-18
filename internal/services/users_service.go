@@ -41,7 +41,9 @@ func (s *Services) CreateUser(newUser models.CreateUserRequest) (uuid.UUID, stri
 		return uuid.Nil, "", err
 	}
 
-	accessToken, _, err := s.jwtToken.CreateToken(uid, newUser.Email, time.Hour)
+	isVerified := false
+
+	accessToken, _, err := s.jwtToken.CreateToken(uid, newUser.Email, isVerified, time.Hour)
 
 	if err != nil {
 		return uuid.Nil, "", err
