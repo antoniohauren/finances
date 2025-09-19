@@ -2,8 +2,10 @@ package services
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/antoniohauren/finances/internal/models"
+	"github.com/antoniohauren/finances/internal/storage"
 	"github.com/google/uuid"
 )
 
@@ -31,8 +33,38 @@ func (s *Services) CreatePayment(newPayment models.CreatePaymentRequest) (uuid.U
 	return uid, nil
 }
 
+func (s *Services) AttatchReceipt(file io.Reader, filename string, paymentID uuid.UUID, userID uuid.UUID) error {
+	data, err := storage.UploadFile(file, filename, "receipt", "images")
+
+	if err != nil {
+		return err
+	}
+
+	dto := models.Upload{
+		UserID:     userID,
+		BucketName: data.BucketName,
+		Key:        data.Key,
+	}
+
+	id, err := s.repos.Upload.UploadFile(dto)
+
+	if err != nil {
+		return err
+	}
+
+	uid, err := uuid.Parse(id)
+
+	if err != nil {
+		return err
+	}
+
+	s.repos.Payment.AttatchReceipt(paymentID, uid)
+
+	return nil
+}
+
 func (s *Services) GetPaymentByID(userID uuid.UUID, id uuid.UUID) (*models.GetPaymentByIdResponse, error) {
-	payment, err := s.repos.Payment.GetPaymentByID(id)
+	payment, fileUpload, err := s.repos.Payment.GetPaymentByID(id)
 
 	if err != nil {
 		return nil, err
@@ -42,12 +74,22 @@ func (s *Services) GetPaymentByID(userID uuid.UUID, id uuid.UUID) (*models.GetPa
 		return nil, fmt.Errorf("can't access this")
 	}
 
+	receiptURL := ""
+
+	if fileUpload != nil && fileUpload.UserID == userID {
+		if url, err := storage.GetFileURL(fileUpload.BucketName, fileUpload.Key); err == nil {
+			receiptURL = url
+		}
+	}
+
 	res := models.GetPaymentByIdResponse{
-		ID:     payment.ID,
-		Date:   payment.Date,
-		Amount: payment.Amount,
-		Method: payment.Method,
-		UserID: payment.UserID,
+		ID:         payment.ID,
+		Date:       payment.Date,
+		Amount:     payment.Amount,
+		Method:     payment.Method,
+		UserID:     payment.UserID,
+		BillID:     payment.BillID,
+		ReceiptURL: receiptURL,
 	}
 
 	return &res, nil
@@ -69,6 +111,7 @@ func (s *Services) GetAllPayments(userId uuid.UUID) []models.PaymentItemResponse
 			Date:   p.Date,
 			Method: p.Method,
 			UserID: p.UserID,
+			BillID: p.BillID,
 		}
 	}
 

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 
 	"github.com/antoniohauren/finances/internal/models"
@@ -37,19 +38,26 @@ func (r *PgPaymentRepo) CreatePayment(newPayment models.Payment) (string, error)
 
 	if err != nil {
 		slog.Error("create payment", "error", err.Error())
+		return "", nil
 	}
 
 	return id, nil
 }
 
-func (r *PgPaymentRepo) GetPaymentByID(id uuid.UUID) (*models.Payment, error) {
+func (r *PgPaymentRepo) GetPaymentByID(id uuid.UUID) (*models.Payment, *models.Upload, error) {
 	query := `
-		SELECT id, amount, date, method, user_id
-		FROM payments
-		WHERE id = $1;	
+		SELECT p.id, p.amount, p.date, p.method, p.user_id, p.bill_id,
+					 u.bucket_name, u.file_key, u.user_id
+		FROM payments p
+		LEFT JOIN uploads u ON p.receipt_id = u.id
+		WHERE p.id = $1;
 	`
 
 	var payment models.Payment
+	// upload
+	var bucketName sql.NullString
+	var fileKey sql.NullString
+	var userID sql.NullString
 
 	err := r.db.QueryRow(query, id).Scan(
 		&payment.ID,
@@ -57,6 +65,11 @@ func (r *PgPaymentRepo) GetPaymentByID(id uuid.UUID) (*models.Payment, error) {
 		&payment.Date,
 		&payment.Method,
 		&payment.UserID,
+		&payment.BillID,
+		// upload
+		&bucketName,
+		&fileKey,
+		&userID,
 	)
 
 	if err != nil {
@@ -64,11 +77,22 @@ func (r *PgPaymentRepo) GetPaymentByID(id uuid.UUID) (*models.Payment, error) {
 			slog.Error("get-payment-by-id", "error", err.Error())
 		}
 
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &payment, nil
+	if bucketName.Valid && fileKey.Valid && userID.Valid {
+		id, _ := uuid.Parse(userID.String)
 
+		upload := models.Upload{
+			BucketName: bucketName.String,
+			Key:        fileKey.String,
+			UserID:     id,
+		}
+
+		return &payment, &upload, nil
+	}
+
+	return &payment, nil, nil
 }
 
 func (r *PgPaymentRepo) GetAllPayments(userId uuid.UUID) ([]models.Payment, error) {
@@ -153,4 +177,20 @@ func (r *PgPaymentRepo) GetAllPaymentsByBill(userID uuid.UUID, billID uuid.UUID)
 	}
 
 	return payments, nil
+}
+
+func (r *PgPaymentRepo) AttatchReceipt(paymentID uuid.UUID, uploadID uuid.UUID) error {
+	query := `
+		UPDATE payments
+		SET receipt_id = $1, updated_at = now()
+		WHERE id = $2;
+	`
+
+	_, err := r.db.Exec(query, uploadID, paymentID)
+
+	if err != nil {
+		return fmt.Errorf("attach receipt: %w", err)
+	}
+
+	return nil
 }

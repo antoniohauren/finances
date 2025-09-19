@@ -11,6 +11,7 @@ import (
 	"github.com/antoniohauren/finances/internal/handlers"
 	"github.com/antoniohauren/finances/internal/repositories"
 	"github.com/antoniohauren/finances/internal/services"
+	"github.com/antoniohauren/finances/internal/storage"
 	"github.com/joho/godotenv"
 )
 
@@ -24,6 +25,7 @@ func init() {
 	db = database.ConnectDB()
 
 	database.MigrateAll(db)
+	storage.NewS3Client()
 }
 
 func main() {

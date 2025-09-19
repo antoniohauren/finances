@@ -21,9 +21,13 @@ type Repositories struct {
 	}
 	Payment interface {
 		CreatePayment(newPayment models.Payment) (string, error)
-		GetPaymentByID(id uuid.UUID) (*models.Payment, error)
+		GetPaymentByID(id uuid.UUID) (*models.Payment, *models.Upload, error)
 		GetAllPayments(userId uuid.UUID) ([]models.Payment, error)
 		GetAllPaymentsByBill(userId uuid.UUID, billID uuid.UUID) ([]models.Payment, error)
+		AttatchReceipt(paymentID uuid.UUID, uploadID uuid.UUID) error
+	}
+	Upload interface {
+		UploadFile(upload models.Upload) (string, error)
 	}
 }
 
@@ -32,5 +36,6 @@ func New(db *sql.DB) *Repositories {
 		User:    NewPgUsersRepo(db),
 		Bill:    NewPgBillRepo(db),
 		Payment: NewPaymentRepo(db),
+		Upload:  NewPgUploadRepo(db),
 	}
 }

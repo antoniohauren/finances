@@ -76,6 +76,21 @@ func UploadFile(file io.Reader, orignalName string, bucketName string, uploadDir
 	}, nil
 }
 
+func GetPublicFileURL(bucketName string, key string) (string, error) {
+	presigner := s3.NewPresignClient(s3Client)
+	presignedReq, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	}, nil)
+
+	if err != nil {
+		slog.Error("presign-url", "error", err)
+		return "", fmt.Errorf("failed to generate presigned url: %w", err)
+	}
+
+	return presignedReq.URL, nil
+}
+
 func GetFileURL(bucketName string, key string) (string, error) {
 	presigner := s3.NewPresignClient(s3Client)
 	presignedReq, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{

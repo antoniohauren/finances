@@ -15,6 +15,10 @@ func MigrateAll(db *sql.DB) error {
 		return err
 	}
 
+	if err := migrations.MigrateUploads(db); err != nil {
+		return err
+	}
+
 	if err := migrations.MigratePayment(db); err != nil {
 		return err
 	}

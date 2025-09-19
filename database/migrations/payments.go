@@ -12,6 +12,7 @@ func MigratePayment(db *sql.DB) error {
 			date TIMESTAMP NOT NULL,
 			amount NUMERIC(10,2) NOT NULL,
     	method VARCHAR(50) NOT NULL,
+			receipt_id UUID REFERENCES uploads(id),
 			bill_id UUID NOT NULL REFERENCES bills(id) ON DELETE CASCADE,
 			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 			created_at TIMESTAMPTZ DEFAULT (now()),

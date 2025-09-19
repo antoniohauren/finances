@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/antoniohauren/finances/internal/models"
-	"github.com/antoniohauren/finances/internal/storage"
 	"github.com/google/uuid"
 )
 
@@ -15,7 +14,7 @@ func (h Handlers) registerPaymentsEndpoints() {
 	http.HandleFunc("GET /payments", h.getAllPaymentsEndpoint)
 	http.HandleFunc("GET /payments/{payment_id}", h.getPaymentByIdEndpoint)
 	http.HandleFunc("GET /payments/bill/{bill_id}", h.getPaymentByBillEndpoint)
-	http.HandleFunc("POST /payments/upload-receipt", h.uploadReceiptEndpoint)
+	http.HandleFunc("POST /payments/{payment_id}/upload-receipt", h.uploadReceiptEndpoint)
 }
 
 func (h Handlers) createPaymentEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -143,8 +142,31 @@ func (h Handlers) getPaymentByBillEndpoint(w http.ResponseWriter, r *http.Reques
 }
 
 func (h Handlers) uploadReceiptEndpoint(w http.ResponseWriter, r *http.Request) {
+	user, err := h.ExtractUserFromToken(w, r)
+
+	if err != nil {
+		slog.Error("extract-user", "error", err.Error())
+		respondJSONError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	if !user.IsVerified {
+		respondJSONError(w, http.StatusUnauthorized, "please confirm your email")
+		return
+	}
+
+	id := r.PathValue("payment_id")
+
+	paymentID, err := uuid.Parse(id)
+
+	if err != nil {
+		slog.Error("payment-id", "error", err.Error())
+		respondJSONError(w, http.StatusBadRequest, "BadRequest")
+		return
+	}
+
 	// 10 MB
-	err := r.ParseMultipartForm(10 << 20)
+	err = r.ParseMultipartForm(10 << 20)
 
 	if err != nil {
 		slog.Error("file size", "error", err)
@@ -161,12 +183,14 @@ func (h Handlers) uploadReceiptEndpoint(w http.ResponseWriter, r *http.Request) 
 
 	defer file.Close()
 
-	data, err := storage.UploadFile(file, header.Filename, "receipt", "images")
+	err = h.services.AttatchReceipt(file, header.Filename, paymentID, user.ID)
 
 	if err != nil {
 		respondJSONError(w, http.StatusInternalServerError, "something went wrong")
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, data)
+	respondJSON(w, http.StatusCreated, models.SuccessResponse{
+		Message: "done",
+	})
 }

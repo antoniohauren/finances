@@ -8,11 +8,12 @@ import (
 
 type Payment struct {
 	BaseEntity
-	Date   time.Time
-	Amount float32
-	Method BillPaymentMethod
-	UserID uuid.UUID
-	BillID uuid.UUID
+	Date       time.Time
+	Amount     float32
+	Method     BillPaymentMethod
+	ReceiptURL string
+	UserID     uuid.UUID
+	BillID     uuid.UUID
 }
 
 type CreatePaymentRequest struct {
@@ -40,4 +41,12 @@ type GetAllPaymentsResponse struct {
 	Items []PaymentItemResponse `json:"items"`
 }
 
-type GetPaymentByIdResponse PaymentItemResponse
+type GetPaymentByIdResponse struct {
+	ID         uuid.UUID         `json:"payment_id"`
+	Date       time.Time         `json:"date"`
+	Amount     float32           `json:"amount"`
+	Method     BillPaymentMethod `json:"method"`
+	BillID     uuid.UUID         `json:"bill_id"`
+	UserID     uuid.UUID         `json:"user_id"`
+	ReceiptURL string            `json:"receipt_url,omitempty"`
+}
