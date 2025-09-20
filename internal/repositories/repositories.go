@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/antoniohauren/finances/internal/models"
 	"github.com/google/uuid"
@@ -29,6 +30,9 @@ type Repositories struct {
 	Upload interface {
 		UploadFile(upload models.Upload) (string, error)
 	}
+	Report interface {
+		GetMonthyReport(userID uuid.UUID, month time.Time) ([]models.Report, error)
+	}
 }
 
 func New(db *sql.DB) *Repositories {
@@ -37,5 +41,6 @@ func New(db *sql.DB) *Repositories {
 		Bill:    NewPgBillRepo(db),
 		Payment: NewPaymentRepo(db),
 		Upload:  NewPgUploadRepo(db),
+		Report:  NewReportRepo(db),
 	}
 }
